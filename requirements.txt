@@ -1,0 +1,10 @@
+torch==2.7.1
+torchvision==0.22.1
+streamlit
+opencv-python-headless
+numpy
+pillow
+moviepy==1.0.3
+tqdm
+matplotlib
+streamlit-image-comparison

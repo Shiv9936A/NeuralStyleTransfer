@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+
+.env
+.venv
+venv/
+
+data/
+*.zip
+
+loss_history*.json
+
+saved_models/*_stats.json
+saved_models/*_metadata.json
