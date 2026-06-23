@@ -34,6 +34,7 @@ def train_style(style_name):
     config = TRAINING_CONFIG[style_name]
     MODEL_SAVE_PATH = config["save_path"]
     style_folder = config["style_folder"]
+    style_path = os.path.join( style_folder,"master.jpg")
 
     transform = transforms.Compose([
         transforms.Resize(450),
@@ -71,20 +72,20 @@ def train_style(style_name):
     loss_history = []
     start_time = time.time()
 
+    style_img = Image.open(style_path).convert("RGB")
+    style_img = transform(style_img).unsqueeze(0).to(DEVICE)
+    style_features = vgg(style_img)
+
+    style_gram = [                              # outside loop because compute once, reuse forever
+        gram_matrix(f)
+        for f in style_features
+    ]
     print("Training started")
     for epoch in range(EPOCHS):
-        style_file = random.choice(os.listdir(style_folder))
-        style_path = os.path.join( style_folder,style_file)
+        # style_file = random.choice(os.listdir(style_folder))
+        # style_path = os.path.join( style_folder,style_file)
         print(f"Using Style Image: {style_path}")
 
-        style_img = Image.open(style_path).convert("RGB")
-        style_img = transform(style_img).unsqueeze(0).to(DEVICE)
-        style_features = vgg(style_img)
-
-        style_gram = [                              # outside loop because compute once, reuse forever
-            gram_matrix(f)
-            for f in style_features
-        ]
 
         progress_bar = tqdm(
             loader,
