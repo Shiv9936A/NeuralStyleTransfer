@@ -99,6 +99,7 @@ with image_tab:
                 status.info("Applying style...")
                 progress.progress(20)
                 try:
+                    st.write("Model:", model_path)
                     output_image = stylize_image(image,model_path,DEVICE,strength)
                 except Exception as e:
                     st.error(f"Error: {e}")

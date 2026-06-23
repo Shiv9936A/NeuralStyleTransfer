@@ -24,7 +24,10 @@ def stylize_image(image, model_path,device,alpha=1.0):
         transforms.ToTensor(),
     ])
 
-    model = get_model(MODEL_PATH,DEVICE)                         
+    model = get_model(MODEL_PATH,DEVICE)
+    print("="*50)
+    print("LOADED MODEL:", MODEL_PATH)
+    print("="*50)                         
 
     # image = Image.open(INPUT_IMAGE).convert("RGB")
     image = image.convert("RGB")
@@ -36,7 +39,8 @@ def stylize_image(image, model_path,device,alpha=1.0):
         output = torch.clamp(output, 0, 1)
         output = output * 1.25
 
-    output = alpha*output + (1-alpha)*image
+    # output = alpha*output + (1-alpha)*image
+    output = output
     output = output.squeeze(0)
     output = output.clamp(0,1)                  # output will be adjusted between 0 - 1
     output_image = transforms.ToPILImage()(output.cpu())
