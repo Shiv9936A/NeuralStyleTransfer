@@ -34,6 +34,7 @@ def stylize_image(image, model_path,device,alpha=1.0):
     with torch.no_grad():                       # because of no gradient , faster
         output = model(image)
         output = torch.clamp(output, 0, 1)
+        output = output * 1.25
 
     output = alpha*output + (1-alpha)*image
     output = output.squeeze(0)
