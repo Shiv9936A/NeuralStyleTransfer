@@ -17,7 +17,7 @@ import os
 
 torch.backends.cudnn.benchmark = True
 
-IMAGE_SIZE = 256
+IMAGE_SIZE = 384
 BATCH_SIZE = 8
 EPOCHS = 30
 
@@ -36,14 +36,14 @@ def train_style(style_name):
     style_folder = config["style_folder"]
 
     transform = transforms.Compose([
-        transforms.Resize(286),
-        transforms.RandomCrop(256),
+        transforms.Resize(450),
+        transforms.RandomCrop(384),
         transforms.RandomHorizontalFlip(),
-        # transforms.ColorJitter(
-        #     brightness=0.2,
-        #     contrast=0.2,
-        #     saturation=0.2
-        # ),
+        transforms.ColorJitter(
+            brightness=0.2,
+            contrast=0.2,
+            saturation=0.2
+        ),
         transforms.ToTensor()                           # jpg/jpeg/png to Tensor [3,256,256]
     ])
 

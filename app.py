@@ -90,11 +90,13 @@ with image_tab:
 
         if generate and uploaded_file:
             model_path = TRAINING_CONFIG[style]["save_path"]
-
+            status = st.empty()
+            status.info("Loading model...")
             progress = st.progress(0)
             with st.spinner(
                 "Generating..."
             ):
+                status.info("Applying style...")
                 progress.progress(20)
                 try:
                     output_image = stylize_image(image,model_path,DEVICE,strength)
@@ -108,7 +110,8 @@ with image_tab:
                 buffer = BytesIO()
                 output_image.save(
                     buffer,
-                    format="PNG"
+                    format="PNG",
+                    compress_level=0
                 )
                 buffer.seek(0)
 
@@ -127,11 +130,11 @@ with image_tab:
                 st.subheader("Before / After Comparison")
 
                 image_comparison(
-                    img1=image,
-                    img2=output_image,
+                    img1=image.resize((384,384)),
+                    img2=output_image.resize((384,384)),
                     label1="Original",
                     label2="Stylized",
-                    width=500
+                    width=384
                 )
 
                 st.download_button(

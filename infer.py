@@ -17,10 +17,10 @@ def stylize_image(image, model_path,device,alpha=1.0):
     alpha = max(0.0,min(alpha,1.0))             # a just validation
     MODEL_PATH = model_path
     DEVICE = device
-    IMAGE_SIZE = 256
+    IMAGE_SIZE = 384
 
     transform = transforms.Compose([
-        transforms.Resize((IMAGE_SIZE,IMAGE_SIZE)),
+        transforms.Resize((IMAGE_SIZE,IMAGE_SIZE),interpolation=Image.LANCZOS),
         transforms.ToTensor(),
     ])
 
@@ -33,6 +33,7 @@ def stylize_image(image, model_path,device,alpha=1.0):
 
     with torch.no_grad():                       # because of no gradient , faster
         output = model(image)
+        output = torch.clamp(output, 0, 1)
 
     output = alpha*output + (1-alpha)*image
     output = output.squeeze(0)

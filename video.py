@@ -20,7 +20,7 @@ def stylize_video(input_video,output_video,model_path,device):
     MODEL_PATH = model_path
     INPUT_VIDEO = input_video
     OUTPUT_VIDEO = output_video
-    IMAGE_SIZE = 256
+    IMAGE_SIZE = 384
     DEVICE = device
 
     model = get_model(MODEL_PATH,DEVICE)
