@@ -17,7 +17,7 @@ import os
 
 torch.backends.cudnn.benchmark = True
 
-IMAGE_SIZE = 384
+IMAGE_SIZE = 256
 BATCH_SIZE = 8
 EPOCHS = 30
 
@@ -36,9 +36,14 @@ def train_style(style_name):
     style_folder = config["style_folder"]
     style_path = os.path.join( style_folder,"master.jpg")
 
-    transform = transforms.Compose([
-        transforms.Resize(450),
-        transforms.RandomCrop(384),
+    style_transform = transforms.Compose([
+        transforms.Resize((IMAGE_SIZE,IMAGE_SIZE)),
+        transforms.ToTensor()
+    ])
+
+    content_transform = transforms.Compose([
+        transforms.Resize(int(IMAGE_SIZE*1.2)),
+        transforms.RandomCrop(IMAGE_SIZE),
         transforms.RandomHorizontalFlip(),
         transforms.ColorJitter(
             brightness=0.2,
@@ -48,11 +53,11 @@ def train_style(style_name):
         transforms.ToTensor()                           # jpg/jpeg/png to Tensor [3,256,256]
     ])
 
-    dataset = FlatImageDataset(DATA_DIR,transform)
+    dataset = FlatImageDataset(DATA_DIR,content_transform)
     total_images = len(dataset)
     print(f"Dataset Size: {total_images}")
 
-    loader = DataLoader(dataset,batch_size=BATCH_SIZE,shuffle=True,num_workers=4,pin_memory=True)
+    loader = DataLoader(dataset,batch_size=BATCH_SIZE,shuffle=True,num_workers=2,pin_memory=True)
 
     model = TransformNet().to(DEVICE)
     vgg = VGGFeatures().to(DEVICE)
@@ -73,11 +78,11 @@ def train_style(style_name):
     start_time = time.time()
 
     style_img = Image.open(style_path).convert("RGB")
-    style_img = transform(style_img).unsqueeze(0).to(DEVICE)
+    style_img = style_transform(style_img).unsqueeze(0).to(DEVICE)
     style_features = vgg(style_img)
 
     style_gram = [                              # outside loop because compute once, reuse forever
-        gram_matrix(f)
+        gram_matrix(f).detach() 
         for f in style_features
     ]
     print("Training started")
@@ -85,7 +90,7 @@ def train_style(style_name):
         # style_file = random.choice(os.listdir(style_folder))
         # style_path = os.path.join( style_folder,style_file)
         print(f"Using Style Image: {style_path}")
-
+        total_epoch_loss = 0
 
         progress_bar = tqdm(
             loader,
@@ -114,8 +119,9 @@ def train_style(style_name):
                     sg.expand_as(gm)
                 )
 
-            loss = content_loss + style_loss * 300
+            loss = content_loss + style_loss * 1e2
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0)
             optimizer.step()
             # with autocast(device_type="cuda"):
 
@@ -150,19 +156,16 @@ def train_style(style_name):
 
             # scaler.update()
 
-            progress_bar.set_postfix(
-                loss=f"{loss.item():.4f}"
-            )
-
             current_loss = loss.item()
             loss_history.append(current_loss)
+            total_epoch_loss += current_loss
+            progress_bar.set_postfix(loss=f"{loss.item():.4f}")
 
-            if current_loss < best_loss:
-                best_loss = current_loss
-                torch.save(
-                    model.state_dict(),
-                    MODEL_SAVE_PATH
-                )
+        avg_loss = total_epoch_loss / len(loader)
+        print(f"Epoch {epoch+1} | Avg Loss: {avg_loss:.4f}")
+        if avg_loss < best_loss:
+            best_loss = avg_loss
+            torch.save(model.state_dict(), MODEL_SAVE_PATH)
 
     metadata = {
         "style": style_name,
