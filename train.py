@@ -34,7 +34,12 @@ def train_style(style_name):
     config = TRAINING_CONFIG[style_name]
     MODEL_SAVE_PATH = config["save_path"]
     style_folder = config["style_folder"]
-    style_path = os.path.join( style_folder,"master.jpg")
+    style_files = [f for f in os.listdir(style_folder)
+                if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+    if not style_files:
+        raise FileNotFoundError(f"No images found in {style_folder}")
+    style_path = os.path.join(style_folder, style_files[0])
+    print(f"Using style image: {style_path}")
 
     style_transform = transforms.Compose([
         transforms.Resize((IMAGE_SIZE,IMAGE_SIZE)),
@@ -83,7 +88,7 @@ def train_style(style_name):
 
     style_gram = [                              # outside loop because compute once, reuse forever
         gram_matrix(f).detach() 
-        for f in style_features[:3]
+        for f in style_features
     ]
     print("Training started")
     for epoch in range(EPOCHS):
@@ -165,7 +170,10 @@ def train_style(style_name):
         print(f"Epoch {epoch+1} | Avg Loss: {avg_loss:.4f}")
         if avg_loss < best_loss:
             best_loss = avg_loss
-            torch.save(model.state_dict(), MODEL_SAVE_PATH)
+            torch.save(model.state_dict(), MODEL_SAVE_PATH.replace(".pth","_best.pth"))
+
+
+    torch.save(model.state_dict(), MODEL_SAVE_PATH)
 
     metadata = {
         "style": style_name,
@@ -212,4 +220,11 @@ def train_style(style_name):
         )
 
     print("Model successfully saved")
+
+
+if __name__ == "__main__":
+    import sys
+
+    style = sys.argv[1] if len(sys.argv) > 1 else "anime"
+    train_style(style)
     

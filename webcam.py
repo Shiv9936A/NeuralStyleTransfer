@@ -37,11 +37,10 @@ def start_webcam(style_name,device,alpha=1.0):
         image = transform(image).unsqueeze(0).to(DEVICE)
         
         with torch.no_grad():
-            output = model(image)
+            output = model(image).squeeze(0).clamp(0, 1)
 
-        output = alpha*output + (1-alpha)*image
-        output = output.squeeze(0)
-        output = output.clamp(0,1)
+        image_sq = image.squeeze(0).clamp(0,1)
+        output = alpha*output + (1-alpha)*image_sq
         output = transforms.ToPILImage()(output.cpu())
 
         output_frame = cv2.cvtColor(

@@ -4,12 +4,10 @@ from moviepy.editor import VideoFileClip
 # INPUT_VIDEO = "test/input.mp4"
 # OUTPUT_VIDEO = "outputs/output.mp4"
 
-def merge_audio(original_video,styled_video,final_output):
-    INPUT_VIDEO = original_video
-    OUTPUT_VIDEO = styled_video
+def merge_audio(original_video_path,styled_video_path,final_output):
 
-    styled_video = VideoFileClip(OUTPUT_VIDEO)
-    original_video = VideoFileClip(INPUT_VIDEO)
+    styled_video = VideoFileClip(styled_video_path)
+    original_video = VideoFileClip(original_video_path)
 
     audio = original_video.audio
 

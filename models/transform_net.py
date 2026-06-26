@@ -23,8 +23,8 @@ class TransformNet(nn.Module):
             ResidualBlock(128),
             ResidualBlock(128),
             ResidualBlock(128),
-            # ResidualBlock(128),       # for 5 residual blks we need 50-80 epochs 
-            # ResidualBlock(128),
+            ResidualBlock(128),       # for 5 residual blks we need 50-80 epochs 
+            ResidualBlock(128),
 
             # upsampling
             nn.ConvTranspose2d(128,64,kernel_size=3,stride=2,padding=1,output_padding=1),
@@ -36,9 +36,8 @@ class TransformNet(nn.Module):
             nn.ReLU(inplace=True),
 
             nn.Conv2d(32,3,kernel_size=9,stride=1,padding=4),
-            nn.Tanh()                               # output will be in [-1,1]
+            nn.Sigmoid()                               # output will be in [-1,1]
         )
 
     def forward(self,x):
-        out = self.model(x)
-        return (out+1)/2                            # output will be in [0,1]
+        return self.model(x)                           # output will be in [0,1]

@@ -20,7 +20,7 @@ def stylize_image(image, model_path,device,alpha=1.0):
     IMAGE_SIZE = 256
 
     transform = transforms.Compose([
-        transforms.Resize((IMAGE_SIZE,IMAGE_SIZE),interpolation=Image.LANCZOS),
+        transforms.Resize((IMAGE_SIZE, IMAGE_SIZE), interpolation=Image.Resampling.LANCZOS),
         transforms.ToTensor(),
     ])
 
@@ -38,10 +38,9 @@ def stylize_image(image, model_path,device,alpha=1.0):
         output = model(image)
         # output = output * 1.25                # brightness boost 
 
-    output = output.squeeze(0)
-    image_sq = image.squeeze(0)
+    output = output.squeeze(0).clamp(0,1)
+    image_sq = image.squeeze(0).clamp(0,1)
     output = alpha*output + (1-alpha)*image_sq
-    output = output.clamp(0,1)                  # output will be adjusted between 0 - 1
     output_image = transforms.ToPILImage()(output.cpu())
     # output_image.save(OUTPUT_IMAGE)
     # print(f"Saved: {OUTPUT_IMAGE}")

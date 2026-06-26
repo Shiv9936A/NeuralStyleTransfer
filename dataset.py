@@ -29,6 +29,7 @@ class FlatImageDataset(Dataset):
     
     def __getitem__(self, key):
         image = default_loader(self.image_paths[key])
+        image = image.convert("RGB")    # force RGB — handles RGBA PNGs
         if self.transform:
             image = self.transform(image)
 
