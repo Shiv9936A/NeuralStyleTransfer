@@ -36,7 +36,9 @@ class TransformNet(nn.Module):
             nn.ReLU(inplace=True),
 
             nn.Conv2d(32,3,kernel_size=9,stride=1,padding=4),
+            nn.Tanh()                               # output will be in [-1,1]
         )
 
     def forward(self,x):
-        return self.model(x)
+        out = self.model(x)
+        return (out+1)/2                            # output will be in [0,1]
