@@ -19,7 +19,7 @@ torch.backends.cudnn.benchmark = True
 
 IMAGE_SIZE = 256
 BATCH_SIZE = 8
-EPOCHS = 30
+EPOCHS = 50
 
 DEVICE = torch.device(
     "cuda" if torch.cuda.is_available()         # checks GPU availability
@@ -83,7 +83,7 @@ def train_style(style_name):
 
     style_gram = [                              # outside loop because compute once, reuse forever
         gram_matrix(f).detach() 
-        for f in style_features
+        for f in style_features[:3]
     ]
     print("Training started")
     for epoch in range(EPOCHS):
@@ -105,13 +105,13 @@ def train_style(style_name):
             output_features = vgg(output)
 
             content_loss = mse(
-                output_features[2],
-                content_features[2]
+                output_features[3],
+                content_features[3]
             )
 
             style_loss = 0
 
-            for of, sg in zip(output_features, style_gram):
+            for of, sg in zip(output_features[:3], style_gram):
                 gm = gram_matrix(of)
 
                 style_loss += mse(

@@ -14,7 +14,7 @@ class VGGFeatures(nn.Module):
         outputs = []
         for i, layer in enumerate(self.features):
             x = layer(x)
-            if i in [0,5,10]:       # 0 layer - edges ; 5 - textures ; 10 - patterns ; 19 - high level content
+            if i in [0,5,10,19]:       # 0 layer - edges ; 5 - textures ; 10 - patterns ; 19 - high level content
                 outputs.append(x)
             
         return outputs    

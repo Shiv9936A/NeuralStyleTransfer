@@ -17,7 +17,7 @@ def stylize_image(image, model_path,device,alpha=1.0):
     alpha = max(0.0,min(alpha,1.0))             # a just validation
     MODEL_PATH = model_path
     DEVICE = device
-    IMAGE_SIZE = 512
+    IMAGE_SIZE = 256
 
     transform = transforms.Compose([
         transforms.Resize((IMAGE_SIZE,IMAGE_SIZE),interpolation=Image.LANCZOS),
