@@ -92,7 +92,7 @@ def train_style(style_name):
         gram = gram_matrix(f)  # [1, c, c]
         gram = gram.squeeze(0).detach()  # [c, c]
         style_gram.append(gram)
-        
+
     print("Training started")
     for epoch in range(EPOCHS):
         # style_file = random.choice(os.listdir(style_folder))
@@ -122,10 +122,7 @@ def train_style(style_name):
             for of, sg, w in zip(output_features, style_gram, style_weights):
                 gm = gram_matrix(of)
                 gm_avg = gm.mean(0)
-                style_loss += w*mse(
-                    gm_avg,
-                    sg
-                )
+                style_loss += w * mse(gm_avg, sg)
 
             loss = content_loss*1.0 + style_loss * 1e4
             loss.backward()
