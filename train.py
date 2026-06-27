@@ -70,7 +70,7 @@ def train_style(style_name):
     mse = nn.MSELoss()
     optimizer = optim.Adam(
         model.parameters(),
-        lr = 1e-3
+        lr = 5e-4
     )
 
 
@@ -86,10 +86,13 @@ def train_style(style_name):
     style_img = style_transform(style_img).unsqueeze(0).to(DEVICE)
     style_features = vgg(style_img)
 
-    style_gram = [                              # outside loop because compute once, reuse forever
-        gram_matrix(f).detach() 
-        for f in style_features
-    ]
+    style_gram = []
+    for f in style_features:
+        # f shape: [1, channels, h, w]
+        gram = gram_matrix(f)  # [1, c, c]
+        gram = gram.squeeze(0).detach()  # [c, c]
+        style_gram.append(gram)
+        
     print("Training started")
     for epoch in range(EPOCHS):
         # style_file = random.choice(os.listdir(style_folder))
@@ -110,23 +113,23 @@ def train_style(style_name):
             output_features = vgg(output)
 
             content_loss = mse(
-                output_features[3],
-                content_features[3]
+                output_features[0],
+                content_features[0]
             )
 
             style_loss = 0
-
-            for of, sg in zip(output_features[:3], style_gram):
+            style_weights = [1.0,1.0,1.0,1.0]
+            for of, sg, w in zip(output_features, style_gram, style_weights):
                 gm = gram_matrix(of)
-
-                style_loss += mse(
-                    gm,
-                    sg.expand_as(gm)
+                gm_avg = gm.mean(0)
+                style_loss += w*mse(
+                    gm_avg,
+                    sg
                 )
 
-            loss = content_loss + style_loss * 1e2
+            loss = content_loss*1.0 + style_loss * 1e4
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
             # with autocast(device_type="cuda"):
 
@@ -171,6 +174,7 @@ def train_style(style_name):
         if avg_loss < best_loss:
             best_loss = avg_loss
             torch.save(model.state_dict(), MODEL_SAVE_PATH.replace(".pth","_best.pth"))
+            print(f"  ✓ Saved best model with loss: {best_loss:.4f}")
 
 
     torch.save(model.state_dict(), MODEL_SAVE_PATH)

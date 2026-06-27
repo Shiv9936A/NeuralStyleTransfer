@@ -36,7 +36,8 @@ class TransformNet(nn.Module):
             nn.ReLU(inplace=True),
 
             nn.Conv2d(32,3,kernel_size=9,stride=1,padding=4),
-            nn.Sigmoid()                               # output will be in [-1,1]
+            # nn.Sigmoid()                               # output will be in [0,1]
+            nn.Tanh()
         )
 
     def forward(self,x):

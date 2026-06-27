@@ -31,15 +31,17 @@ def stylize_image(image, model_path,device,alpha=1.0):
 
     # image = Image.open(INPUT_IMAGE).convert("RGB")
     image = image.convert("RGB")
-    image = transform(image).unsqueeze(0).to(DEVICE)
+    image_tensor = transform(image).unsqueeze(0).to(DEVICE)
 
 
     with torch.no_grad():                       # because of no gradient , faster
-        output = model(image)
+        output = model(image_tensor)
         # output = output * 1.25                # brightness boost 
 
-    output = output.squeeze(0).clamp(0,1)
-    image_sq = image.squeeze(0).clamp(0,1)
+    output = output.squeeze(0)
+    output = (output+1)/2
+    output = output.clamp(0,1)
+    image_sq = image_tensor.squeeze(0).clamp(0,1)
     output = alpha*output + (1-alpha)*image_sq
     output_image = transforms.ToPILImage()(output.cpu())
     # output_image.save(OUTPUT_IMAGE)
