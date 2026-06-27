@@ -229,3 +229,4 @@ if __name__ == "__main__":
     style = sys.argv[1] if len(sys.argv) > 1 else "anime"
     train_style(style)
     
+
